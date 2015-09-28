@@ -22,7 +22,13 @@ import (
 	"github.com/Shopify/go-lua"
 )
 
-func PushGoValue(l *lua.State, val interface{}) error {
+// PushValue pushes a Go value mapped to the appropriate Lua binding onto the
+// Lua stack. Usually used like:
+// if err := PushValue(l, x); err == nil {
+//   l.SetGlobal("x")
+// }
+// Will return an error if the conversion is not possible.
+func PushValue(l *lua.State, val interface{}) error {
 	if val == nil {
 		l.PushNil()
 		return nil
@@ -30,6 +36,7 @@ func PushGoValue(l *lua.State, val interface{}) error {
 	return PushReflectedValue(l, reflect.ValueOf(val))
 }
 
+// PushReflectedValue is like PushValue, but works on already reflected values.
 func PushReflectedValue(l *lua.State, val reflect.Value) (err error) {
 	switch val.Kind() {
 	case reflect.Bool:
@@ -96,7 +103,12 @@ func pushReflectedValue(l *lua.State, val reflect.Value) {
 	}
 }
 
-func PushGoType(l *lua.State, example interface{}) error {
+// PushType pushes a constructor for the given example's type onto the Lua
+// stack. Usually used like:
+// if err := PushType(l, Type{}); err == nil {
+//   l.SetGlobal("Type")
+// }
+func PushType(l *lua.State, example interface{}) error {
 	setupType(l)
 	l.PushUserData(reflect.TypeOf(example))
 	lua.SetMetaTableNamed(l, typeName)
@@ -112,6 +124,7 @@ func toReflectedValue(l *lua.State, index int) reflect.Value {
 	return val
 }
 
+// ToReflectedValue is like ToValue, but leaves the type as a reflect.Value
 func ToReflectedValue(l *lua.State, index int) (reflect.Value, error) {
 	switch l.TypeOf(index) {
 	case lua.TypeNil:
@@ -147,6 +160,8 @@ func ToReflectedValue(l *lua.State, index int) (reflect.Value, error) {
 		"unable to cast value to appropriate Go type")
 }
 
+// ToValue returns the reverse-mapped Go value from the Lua stack at index
+// `index`, and an error if the conversion isn't yet possible.
 func ToValue(l *lua.State, index int) (interface{}, error) {
 	val, err := ToReflectedValue(l, index)
 	if err != nil {

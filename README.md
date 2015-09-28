@@ -4,12 +4,14 @@ Custom type reflection for go-lua.
 
 See the docs at https://godoc.org/github.com/jtolds/go-luar
 
+See example usage at https://github.com/jtolds/go-manhole
+
 Big thanks to Tim Cooper's https://github.com/layeh/gopher-luar for
 implementation ideas, etc!
 
 # TODO
 
- * Docs
+ * Better docs
  * Arrays, slices
  * Channels
  * Maps
