@@ -82,13 +82,22 @@ func PushReflectedValue(l *lua.State, val reflect.Value) (err error) {
 		lua.SetMetaTableNamed(l, funcName)
 		return nil
 
+	case reflect.Interface:
+		if val.IsNil() {
+			l.PushNil()
+			return nil
+		}
+		setupInterface(l)
+		l.PushUserData(val)
+		lua.SetMetaTableNamed(l, interfaceName)
+		return nil
+
 	case reflect.Array: // TODO
 	case reflect.Slice: // TODO
 	case reflect.Chan: // TODO
 	case reflect.Map: // TODO
 
 	case reflect.Complex64, reflect.Complex128:
-	case reflect.Interface: // reflection should return a concrete type
 	case reflect.UnsafePointer:
 	}
 
@@ -171,4 +180,16 @@ func ToValue(l *lua.State, index int) (interface{}, error) {
 		return nil, fmt.Errorf("value cannot be read")
 	}
 	return val.Interface(), nil
+}
+
+func fixPanics() {
+	r := recover()
+	if r == nil {
+		return
+	}
+	_, ok := r.(error)
+	if !ok {
+		panic(fmt.Errorf("panic: %v", r))
+	}
+	panic(r)
 }

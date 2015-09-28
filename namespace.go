@@ -16,10 +16,11 @@
 package luar
 
 const (
-	namespace  = "jtolds/go-luar/"
-	typeName   = namespace + "type"
-	structName = namespace + "struct"
-	ptrName    = namespace + "ptr"
-	funcName   = namespace + "func"
-	optsName   = namespace + "opts"
+	namespace     = "jtolds/go-luar/"
+	typeName      = namespace + "type"
+	structName    = namespace + "struct"
+	ptrName       = namespace + "ptr"
+	funcName      = namespace + "func"
+	interfaceName = namespace + "inter"
+	optsName      = namespace + "opts"
 )

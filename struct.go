@@ -42,7 +42,9 @@ func getField(l *lua.State, ref reflect.Value, name_idx int) int {
 		if ref.Kind() == reflect.Ptr {
 			ref = ref.Elem()
 		}
-		val = ref.FieldByName(name)
+		if ref.Kind() != reflect.Interface {
+			val = ref.FieldByName(name)
+		}
 		if !val.IsValid() {
 			lua.ArgumentError(l, name_idx, fmt.Sprintf("field %#v missing", name))
 			panic("unreached")
@@ -83,16 +85,20 @@ func setupStruct(l *lua.State) {
 	}
 	lua.SetFunctions(l, []lua.RegistryFunction{
 		{"__index", func(l *lua.State) int {
+			defer fixPanics()
 			return getField(l, checkStruct(l, 1), 2)
 		}},
 		{"__newindex", func(l *lua.State) int {
+			defer fixPanics()
 			return setField(l, checkStruct(l, 1), 2, 3)
 		}},
 		{"__tostring", func(l *lua.State) int {
+			defer fixPanics()
 			l.PushString(fmt.Sprintf("%#v", checkStruct(l, 1).Interface()))
 			return 1
 		}},
 		{"__eq", func(l *lua.State) int {
+			defer fixPanics()
 			l.PushBoolean(checkStruct(l, 1) == checkStruct(l, 2))
 			return 1
 		}},

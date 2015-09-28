@@ -22,42 +22,32 @@ import (
 	"github.com/Shopify/go-lua"
 )
 
-func checkPtr(l *lua.State, index int) reflect.Value {
-	ref, ok := lua.CheckUserData(l, index, ptrName).(reflect.Value)
-	if !ok || ref.Kind() != reflect.Ptr {
-		lua.ArgumentError(l, 1, "ptr expected")
+func checkInterface(l *lua.State, index int) reflect.Value {
+	ref, ok := lua.CheckUserData(l, index, interfaceName).(reflect.Value)
+	if !ok || ref.Kind() != reflect.Interface {
+		lua.ArgumentError(l, 1, "interface expected")
 		panic("unreached")
 	}
 	return ref
 }
 
-func setupPtr(l *lua.State) {
-	if !lua.NewMetaTable(l, ptrName) {
+func setupInterface(l *lua.State) {
+	if !lua.NewMetaTable(l, interfaceName) {
 		return
 	}
 	lua.SetFunctions(l, []lua.RegistryFunction{
 		{"__index", func(l *lua.State) int {
 			defer fixPanics()
-			return getField(l, checkPtr(l, 1), 2)
-		}},
-		{"__newindex", func(l *lua.State) int {
-			defer fixPanics()
-			return setField(l, checkPtr(l, 1), 2, 3)
+			return getField(l, checkInterface(l, 1), 2)
 		}},
 		{"__tostring", func(l *lua.State) int {
 			defer fixPanics()
-			l.PushString(fmt.Sprintf("%#v", checkPtr(l, 1).Interface()))
-			return 1
-		}},
-		{"__unm", func(l *lua.State) int {
-			defer fixPanics()
-			ref := checkPtr(l, 1)
-			pushReflectedValue(l, ref.Elem())
+			l.PushString(fmt.Sprintf("%#v", checkInterface(l, 1).Interface()))
 			return 1
 		}},
 		{"__eq", func(l *lua.State) int {
 			defer fixPanics()
-			l.PushBoolean(checkPtr(l, 1) == checkPtr(l, 2))
+			l.PushBoolean(checkInterface(l, 1) == checkInterface(l, 2))
 			return 1
 		}},
 	}, 0)

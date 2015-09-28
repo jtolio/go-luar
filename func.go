@@ -42,6 +42,7 @@ func setupFunc(l *lua.State) {
 	}
 	lua.SetFunctions(l, []lua.RegistryFunction{
 		{"__call", func(l *lua.State) int {
+			defer fixPanics()
 			f := checkFunc(l, 1)
 			ft := f.Type()
 			if ft.NumIn() == 1 && ft.NumOut() == 1 &&
@@ -86,10 +87,12 @@ func setupFunc(l *lua.State) {
 			return len(rv)
 		}},
 		{"__tostring", func(l *lua.State) int {
+			defer fixPanics()
 			l.PushString(fmt.Sprintf("%#v", checkFunc(l, 1).Interface()))
 			return 1
 		}},
 		{"__eq", func(l *lua.State) int {
+			defer fixPanics()
 			l.PushBoolean(checkFunc(l, 1) == checkFunc(l, 2))
 			return 1
 		}},
