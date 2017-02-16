@@ -31,8 +31,7 @@ func checkInterface(l *lua.State, index int) reflect.Value {
 	return ref
 }
 
-func setupInterface(l *lua.State) {
-	defer l.Pop(1)
+func pushAndSetupInterfaceTable(l *lua.State) {
 	if !lua.NewMetaTable(l, interfaceName) {
 		return
 	}

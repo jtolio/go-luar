@@ -79,8 +79,7 @@ func setField(l *lua.State, ref reflect.Value, name_idx int, val_idx int) int {
 	return 0
 }
 
-func setupStruct(l *lua.State) {
-	defer l.Pop(1)
+func pushAndSetupStructTable(l *lua.State) {
 	if !lua.NewMetaTable(l, structName) {
 		return
 	}
