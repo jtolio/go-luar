@@ -37,6 +37,7 @@ func checkFunc(l *lua.State, index int) reflect.Value {
 }
 
 func setupFunc(l *lua.State) {
+	defer l.Pop(1)
 	if !lua.NewMetaTable(l, funcName) {
 		return
 	}
