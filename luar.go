@@ -57,9 +57,9 @@ func PushReflectedValue(l *lua.State, val reflect.Value) (err error) {
 		return nil
 
 	case reflect.Struct:
-		setupStruct(l)
 		l.PushUserData(val)
-		lua.SetMetaTableNamed(l, structName)
+		pushAndSetupStructTable(l)
+		l.SetMetaTable(-2)
 
 		return nil
 
@@ -69,9 +69,9 @@ func PushReflectedValue(l *lua.State, val reflect.Value) (err error) {
 			return nil
 		}
 
-		setupPtr(l)
 		l.PushUserData(val)
-		lua.SetMetaTableNamed(l, ptrName)
+		pushAndSetupPtrTable(l)
+		l.SetMetaTable(-2)
 
 		return nil
 
@@ -81,9 +81,9 @@ func PushReflectedValue(l *lua.State, val reflect.Value) (err error) {
 			return nil
 		}
 
-		setupFunc(l)
 		l.PushUserData(val)
-		lua.SetMetaTableNamed(l, funcName)
+		pushAndSetupFuncTable(l)
+		l.SetMetaTable(-2)
 
 		return nil
 
@@ -93,9 +93,9 @@ func PushReflectedValue(l *lua.State, val reflect.Value) (err error) {
 			return nil
 		}
 
-		setupInterface(l)
 		l.PushUserData(val)
-		lua.SetMetaTableNamed(l, interfaceName)
+		pushAndSetupInterfaceTable(l)
+		l.SetMetaTable(-2)
 
 		return nil
 
