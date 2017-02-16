@@ -32,6 +32,7 @@ func checkPtr(l *lua.State, index int) reflect.Value {
 }
 
 func setupPtr(l *lua.State) {
+	defer l.Pop(1)
 	if !lua.NewMetaTable(l, ptrName) {
 		return
 	}

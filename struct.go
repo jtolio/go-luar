@@ -80,6 +80,7 @@ func setField(l *lua.State, ref reflect.Value, name_idx int, val_idx int) int {
 }
 
 func setupStruct(l *lua.State) {
+	defer l.Pop(1)
 	if !lua.NewMetaTable(l, structName) {
 		return
 	}
