@@ -74,7 +74,7 @@ func pushAndSetupFuncTable(l *lua.State) {
 				} else {
 					hint = ft.In(expected - 1).Elem()
 				}
-				args[i] = toReflectedValue(l, i+2).Convert(hint)
+				args[i] = toReflectedValue(l, i+2, hint)
 			}
 			rv := f.Call(args)
 			if !l.CheckStack(len(rv)) {

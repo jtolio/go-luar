@@ -75,7 +75,8 @@ func setField(l *lua.State, ref reflect.Value, name_idx int, val_idx int) int {
 		lua.ArgumentError(l, name_idx, fmt.Sprintf("can't set field %#v", name))
 		panic("unreached")
 	}
-	lhs.Set(toReflectedValue(l, val_idx).Convert(lhs.Type()))
+	hint := lhs.Type()
+	lhs.Set(toReflectedValue(l, val_idx, hint))
 	return 0
 }
 

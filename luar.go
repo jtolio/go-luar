@@ -131,8 +131,9 @@ func PushType(l *lua.State, example interface{}) error {
 	return nil
 }
 
-func toReflectedValue(l *lua.State, index int) reflect.Value {
-	val, err := ToReflectedValue(l, index)
+func toReflectedValue(l *lua.State, index int,
+	hint reflect.Type) reflect.Value {
+	val, err := ToReflectedValue(l, index, hint)
 	if err != nil {
 		lua.Errorf(l, "%s", err.Error())
 		panic("unreachable")
@@ -140,46 +141,89 @@ func toReflectedValue(l *lua.State, index int) reflect.Value {
 	return val
 }
 
-// ToReflectedValue is like ToValue, but leaves the type as a reflect.Value
-func ToReflectedValue(l *lua.State, index int) (reflect.Value, error) {
-	switch l.TypeOf(index) {
-	case lua.TypeNil:
-		return reflect.ValueOf(nil), nil
-	case lua.TypeBoolean:
-		return reflect.ValueOf(l.ToBoolean(index)), nil
-	case lua.TypeNumber:
-		val, ok := l.ToNumber(index)
-		if !ok {
-			return reflect.Value{}, fmt.Errorf("unable to cast to number")
-		}
-		return reflect.ValueOf(val), nil
-	case lua.TypeString:
-		val, ok := l.ToString(index)
-		if !ok {
-			return reflect.Value{}, fmt.Errorf("unable to cast to string")
-		}
-		return reflect.ValueOf(val), nil
+// ToReflectedValue is like ToValue, but leaves the type as a reflect.Value.
+// If hint is not nil, will use hint if possible to try and better inform the
+// conversion (if hint is a slice and the lua value is a table, will simply
+// get the numeric indexes).
+func ToReflectedValue(l *lua.State, index int, hint reflect.Type) (
+	result reflect.Value, err error) {
+	result, err = func() (reflect.Value, error) {
+		switch l.TypeOf(index) {
+		case lua.TypeNil:
+			return reflect.ValueOf(nil), nil
+		case lua.TypeBoolean:
+			return reflect.ValueOf(l.ToBoolean(index)), nil
+		case lua.TypeNumber:
+			val, ok := l.ToNumber(index)
+			if !ok {
+				return reflect.Value{}, fmt.Errorf("unable to cast to number")
+			}
+			return reflect.ValueOf(val), nil
+		case lua.TypeString:
+			val, ok := l.ToString(index)
+			if !ok {
+				return reflect.Value{}, fmt.Errorf("unable to cast to string")
+			}
+			return reflect.ValueOf(val), nil
 
-	case lua.TypeUserData:
-		ud, ok := l.ToUserData(index).(reflect.Value)
-		if !ok {
-			return reflect.Value{}, fmt.Errorf("unable to cast type")
-		}
-		return ud, nil
+		case lua.TypeUserData:
+			ud, ok := l.ToUserData(index).(reflect.Value)
+			if !ok {
+				return reflect.Value{}, fmt.Errorf("unable to cast type")
+			}
+			return ud, nil
 
-	case lua.TypeLightUserData:
-	case lua.TypeTable:
-	case lua.TypeFunction:
-	case lua.TypeThread:
+		case lua.TypeTable:
+			if hint == nil {
+				return reflect.Value{},
+					fmt.Errorf("no hint provided for lua table conversion")
+			}
+			switch hint.Kind() {
+			case reflect.Array: // TODO
+				return reflect.Value{}, fmt.Errorf("TODO: table to array conversion")
+			case reflect.Slice: // TODO
+				return reflect.Value{}, fmt.Errorf("TODO: table to slice conversion")
+			case reflect.Map: // TODO
+				return reflect.Value{}, fmt.Errorf("TODO: table to map conversion")
+			default:
+				return reflect.Value{},
+					fmt.Errorf("not enough information exists to know how to " +
+						"convert lua table to go object")
+			}
+		case lua.TypeLightUserData:
+		case lua.TypeFunction:
+		case lua.TypeThread:
+		}
+		return reflect.Value{}, fmt.Errorf(
+			"unable to cast value to appropriate Go type")
+	}()
+
+	if err != nil || hint == nil {
+		return result, err
 	}
-	return reflect.Value{}, fmt.Errorf(
-		"unable to cast value to appropriate Go type")
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			return
+		}
+		if e, ok := r.(error); ok {
+			err = e
+		} else {
+			err = fmt.Errorf("panic: %v", r)
+		}
+	}()
+
+	return result.Convert(hint), nil
 }
 
 // ToValue returns the reverse-mapped Go value from the Lua stack at index
 // `index`, and an error if the conversion isn't yet possible.
-func ToValue(l *lua.State, index int) (interface{}, error) {
-	val, err := ToReflectedValue(l, index)
+// If hint is not nil, will use hint if possible to try and better inform the
+// conversion (if hint is a slice and the lua value is a table, will simply
+// get the numeric indexes).
+func ToValue(l *lua.State, index int, hint reflect.Type) (interface{}, error) {
+	val, err := ToReflectedValue(l, index, hint)
 	if err != nil {
 		return nil, err
 	}
