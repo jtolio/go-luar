@@ -50,12 +50,12 @@ func setupType(l *lua.State) {
 		return
 	}
 	lua.SetFunctions(l, []lua.RegistryFunction{
-		{"__call", func(l *lua.State) int {
+		{Name: "__call", Function: func(l *lua.State) int {
 			defer fixPanics()
 			pushType(l, checkType(l, 1), true)
 			return 1
 		}},
-		{"__index", func(l *lua.State) int {
+		{Name: "__index", Function: func(l *lua.State) int {
 			defer fixPanics()
 			ref := checkType(l, 1)
 			if lua.CheckString(l, 2) != "new" {
@@ -69,12 +69,12 @@ func setupType(l *lua.State) {
 			})
 			return 1
 		}},
-		{"__tostring", func(l *lua.State) int {
+		{Name: "__tostring", Function: func(l *lua.State) int {
 			defer fixPanics()
 			l.PushString(fmt.Sprintf("Go Type: %v", checkType(l, 1)))
 			return 1
 		}},
-		{"__eq", func(l *lua.State) int {
+		{Name: "__eq", Function: func(l *lua.State) int {
 			defer fixPanics()
 			l.PushBoolean(checkType(l, 1) == checkType(l, 2))
 			return 1

@@ -36,26 +36,26 @@ func pushAndSetupPtrTable(l *lua.State) {
 		return
 	}
 	lua.SetFunctions(l, []lua.RegistryFunction{
-		{"__index", func(l *lua.State) int {
+		{Name: "__index", Function: func(l *lua.State) int {
 			defer fixPanics()
 			return getField(l, checkPtr(l, 1), 2)
 		}},
-		{"__newindex", func(l *lua.State) int {
+		{Name: "__newindex", Function: func(l *lua.State) int {
 			defer fixPanics()
 			return setField(l, checkPtr(l, 1), 2, 3)
 		}},
-		{"__tostring", func(l *lua.State) int {
+		{Name: "__tostring", Function: func(l *lua.State) int {
 			defer fixPanics()
 			l.PushString(fmt.Sprintf("%#v", checkPtr(l, 1).Interface()))
 			return 1
 		}},
-		{"__unm", func(l *lua.State) int {
+		{Name: "__unm", Function: func(l *lua.State) int {
 			defer fixPanics()
 			ref := checkPtr(l, 1)
 			pushReflectedValue(l, ref.Elem())
 			return 1
 		}},
-		{"__eq", func(l *lua.State) int {
+		{Name: "__eq", Function: func(l *lua.State) int {
 			defer fixPanics()
 			l.PushBoolean(checkPtr(l, 1) == checkPtr(l, 2))
 			return 1

@@ -85,20 +85,20 @@ func pushAndSetupStructTable(l *lua.State) {
 		return
 	}
 	lua.SetFunctions(l, []lua.RegistryFunction{
-		{"__index", func(l *lua.State) int {
+		{Name: "__index", Function: func(l *lua.State) int {
 			defer fixPanics()
 			return getField(l, checkStruct(l, 1), 2)
 		}},
-		{"__newindex", func(l *lua.State) int {
+		{Name: "__newindex", Function: func(l *lua.State) int {
 			defer fixPanics()
 			return setField(l, checkStruct(l, 1), 2, 3)
 		}},
-		{"__tostring", func(l *lua.State) int {
+		{Name: "__tostring", Function: func(l *lua.State) int {
 			defer fixPanics()
 			l.PushString(fmt.Sprintf("%#v", checkStruct(l, 1).Interface()))
 			return 1
 		}},
-		{"__eq", func(l *lua.State) int {
+		{Name: "__eq", Function: func(l *lua.State) int {
 			defer fixPanics()
 			l.PushBoolean(checkStruct(l, 1) == checkStruct(l, 2))
 			return 1

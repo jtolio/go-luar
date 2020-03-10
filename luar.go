@@ -131,8 +131,7 @@ func PushType(l *lua.State, example interface{}) error {
 	return nil
 }
 
-func toReflectedValue(l *lua.State, index int,
-	hint reflect.Type) reflect.Value {
+func toReflectedValue(l *lua.State, index int, hint reflect.Type) reflect.Value {
 	val, err := ToReflectedValue(l, index, hint)
 	if err != nil {
 		lua.Errorf(l, "%s", err.Error())
@@ -150,7 +149,12 @@ func ToReflectedValue(l *lua.State, index int, hint reflect.Type) (
 	result, err = func() (reflect.Value, error) {
 		switch l.TypeOf(index) {
 		case lua.TypeNil:
-			return reflect.ValueOf(nil), nil
+			switch hint.Kind() {
+			case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map,
+				reflect.Ptr, reflect.Slice:
+				return reflect.Zero(hint), nil
+			}
+			return reflect.Value{}, fmt.Errorf("non nillable type: %v", hint)
 		case lua.TypeBoolean:
 			return reflect.ValueOf(l.ToBoolean(index)), nil
 		case lua.TypeNumber:

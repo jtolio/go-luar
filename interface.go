@@ -36,16 +36,16 @@ func pushAndSetupInterfaceTable(l *lua.State) {
 		return
 	}
 	lua.SetFunctions(l, []lua.RegistryFunction{
-		{"__index", func(l *lua.State) int {
+		{Name: "__index", Function: func(l *lua.State) int {
 			defer fixPanics()
 			return getField(l, checkInterface(l, 1), 2)
 		}},
-		{"__tostring", func(l *lua.State) int {
+		{Name: "__tostring", Function: func(l *lua.State) int {
 			defer fixPanics()
 			l.PushString(fmt.Sprintf("%#v", checkInterface(l, 1).Interface()))
 			return 1
 		}},
-		{"__eq", func(l *lua.State) int {
+		{Name: "__eq", Function: func(l *lua.State) int {
 			defer fixPanics()
 			l.PushBoolean(checkInterface(l, 1) == checkInterface(l, 2))
 			return 1
