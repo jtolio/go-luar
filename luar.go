@@ -24,9 +24,11 @@ import (
 
 // PushValue pushes a Go value mapped to the appropriate Lua binding onto the
 // Lua stack. Usually used like:
-// if err := PushValue(l, x); err == nil {
-//   l.SetGlobal("x")
-// }
+//
+//	if err := PushValue(l, x); err == nil {
+//	  l.SetGlobal("x")
+//	}
+//
 // Will return an error if the conversion is not possible.
 func PushValue(l *lua.State, val interface{}) error {
 	if val == nil {
@@ -108,7 +110,8 @@ func PushReflectedValue(l *lua.State, val reflect.Value) (err error) {
 	case reflect.UnsafePointer:
 	}
 
-	return fmt.Errorf("unsupported value type: %v", val)
+	l.PushUserData(val)
+	return nil
 }
 
 func pushReflectedValue(l *lua.State, val reflect.Value) {
@@ -121,9 +124,10 @@ func pushReflectedValue(l *lua.State, val reflect.Value) {
 
 // PushType pushes a constructor for the given example's type onto the Lua
 // stack. Usually used like:
-// if err := PushType(l, Type{}); err == nil {
-//   l.SetGlobal("Type")
-// }
+//
+//	if err := PushType(l, Type{}); err == nil {
+//	  l.SetGlobal("Type")
+//	}
 func PushType(l *lua.State, example interface{}) error {
 	setupType(l)
 	l.PushUserData(reflect.TypeOf(example))
